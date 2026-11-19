@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NETWORKING 102 | Terminal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0d1117;
+            --bg-panel: rgba(22, 27, 34, 0.8);
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+            --accent-red: #f85149;
+            --border-color: #30363d;
+            --terminal-bg: #010409;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            /* Subtle grid background pattern */
+            background-image: 
+                linear-gradient(rgba(48, 54, 61, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(48, 54, 61, 0.2) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOP NAVIGATION BAR --- */
+        .top-nav {
+            background-color: var(--bg-panel);
+            backdrop-filter: blur(10px); /* Glassmorphism effect */
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-brand svg {
+            color: var(--accent-green);
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(63, 185, 80, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* --- HEADER & ACTION BAR --- */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .dashboard-header h1 {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.8rem;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); /* Subtle glow */
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .run-btn {
+            background-color: rgba(63, 185, 80, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            font-family: 'Fira Code', monospace;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .run-btn:hover {
+            background-color: rgba(63, 185, 80, 0.2);
+            box-shadow: 0 0 15px rgba(63, 185, 80, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .run-btn:active {
+            transform: translateY(1px);
+        }
+
+        .run-btn:disabled {
+            color: var(--text-muted);
+            border-color: var(--border-color);
+            cursor: not-allowed;
+            background: transparent;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* --- TERMINAL CARDS --- */
+        .terminal-window {
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .terminal-window:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .terminal-header {
+            background-color: var(--bg-panel);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Mac-style window buttons */
+        .window-buttons {
+            display: flex;
+            gap: 8px;
+            margin-right: 16px;
+        }
+
+        .btn-close, .btn-min, .btn-max {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .btn-close { background-color: #ff5f56; }
+        .btn-min { background-color: #ffbd2e; }
+        .btn-max { background-color: #27c93f; }
+
+        .terminal-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            flex: 1;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        pre {
+            padding: 20px;
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #e6edf3;
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Terminal prompt styling */
+        .terminal-prompt {
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            display: block;
+            font-weight: bold;
+        }
+
+        /* --- ERROR MESSAGE --- */
+        .error-box {
+            background-color: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            border-left: 4px solid var(--accent-red);
+            color: #ff7b72;
+            padding: 16px 20px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* --- EMPTY STATE --- */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+            background: rgba(22, 27, 34, 0.3);
+        }
+
+        .empty-state svg {
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Custom Scrollbar for Terminals */
+        pre::-webkit-scrollbar { width: 10px; height: 10px; }
+        pre::-webkit-scrollbar-track { background: var(--terminal-bg); }
+        pre::-webkit-scrollbar-thumb { background: #30363d; border-radius: 5px; }
+        pre::-webkit-scrollbar-thumb:hover { background: #8b949e; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <!-- Terminal Icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            NETWORKING 102
+        </div>
+        <div class="nav-status">
+            <div class="status-dot"></div>
+            admin@192.168.10.215
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        
+        <div class="dashboard-header">
+            <div>
+                <h1>Command Center</h1>
+                <p>Execute configuration and status checks via Telnet.</p>
+            </div>
+            
+            <form method="POST" onsubmit="document.getElementById('runBtn').disabled = true; document.getElementById('runBtn').innerHTML = '<span style=\'color:#8b949e\'>Executing...</span>';">
+                <button type="submit" id="runBtn" class="run-btn">
+                    ./execute_script.sh
+                </button>
+            </form>
+        </div>
+
+        <!-- Error Display -->
+        {% if error %}
+            <div class="error-box">
+                <strong>[EXCEPTION_CAUGHT]</strong> {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- Output Terminals -->
+        {% if results %}
+            {% for cmd, output in results.items() %}
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="window-buttons">
+                            <div class="btn-close"></div>
+                            <div class="btn-min"></div>
+                            <div class="btn-max"></div>
+                        </div>
+                        <div class="terminal-title">bash - session_out.log</div>
+                    </div>
+                    <pre><span class="terminal-prompt">admin@router# {{ cmd }}</span>{{ output }}</pre>
+                </div>
+            {% endfor %}
+            
+        {% elif not error %}
+            <div class="empty-state">
+                <!-- Empty Database Icon -->
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                <p>// No session data available.</p>
+                <p style="margin-top: 5px; font-size: 0.85rem;">Click the execute button to initiate connection.</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
